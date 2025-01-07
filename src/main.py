@@ -1,3 +1,5 @@
+from src.tools.api import get_market_data
+
 def main():
     print("Starting AI Crypto Hedge Fund...")
 

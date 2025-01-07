@@ -23,8 +23,11 @@ def get_binance_prices():
 
 
 def get_market_data():
-    """
-    Combines market data from available sources (only Binance for now).
-    """
-    binance_data = get_binance_prices()
-    return binance_data
+    # Replace with a real API endpoint or mock data
+    try:
+        response = requests.get("https://api.example.com/market_data")
+        response.raise_for_status()
+        return response.json()
+    except Exception as e:
+        print(f"Error fetching market data: {e}")
+        return {}
