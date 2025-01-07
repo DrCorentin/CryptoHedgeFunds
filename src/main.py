@@ -1,4 +1,16 @@
+from src.agents.identifier import IdentifierAgent
 from src.tools.api import get_market_data
+from src.agents.valuation import ValuationAgent
+from src.agents.sentiment import SentimentAgent
+from src.agents.fundamentals import FundamentalsAgent
+from src.agents.technicals import TechnicalsAgent
+from src.agents.portfolio_manager import PortfolioManager
+from src.backtester import Backtester
+import sys
+import os
+
+sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+
 
 def main():
     print("Starting AI Crypto Hedge Fund...")
