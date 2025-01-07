@@ -1,5 +1,5 @@
 import pandas as pd
-from tools.api import get_binance_ticker
+from tools.api import get_binance_prices
 import time
 
 class Backtester:
@@ -14,10 +14,10 @@ class Backtester:
         Simulate a trade using public market prices.
         """
         if to_asset == "BTC":
-            ticker = get_binance_ticker("BTCUSDT")
-            price = float(ticker["price"]) if ticker else None
+            ticker = get_binance_prices("BTCUSDT")
+            price = float(get_binance_prices["price"]) if ticker else None
         elif to_asset == "ETH":
-            ticker = get_binance_ticker("ETHUSDT")
+            ticker = get_binance_prices("ETHUSDT")
             price = float(ticker["price"]) if ticker else None
         else:
             prices = get_pancakeswap_prices()
