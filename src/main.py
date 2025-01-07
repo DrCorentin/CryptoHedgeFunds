@@ -5,20 +5,27 @@ from src.agents.fundamentals import FundamentalsAgent
 from src.agents.technicals import TechnicalsAgent
 from src.agents.risk_manager import RiskManager
 from src.agents.portfolio_manager import PortfolioManager
-from src.tools.api import get_market_data
+from src.tools.api import get_binance_ticker, get_pancakeswap_prices
 from src.backtester import Backtester
 
 def main():
     print("Starting AI Crypto Hedge Fund...")
 
     # Phase 1: Training the model
-    print("Phase 1: Training models...")
-    market_data = get_market_data()
+    print("\nPhase 1: Training models...")
+    # Simulate fetching market data
+    market_data = {
+        "BTC": get_binance_ticker("BTCUSDT"),
+        "ETH": get_binance_ticker("ETHUSDT"),
+        "PancakeSwap": get_pancakeswap_prices()
+    }
+
     identifier = IdentifierAgent()
     high_potential_cryptos = identifier.identify(market_data)
+    print(f"High potential cryptos identified: {high_potential_cryptos}")
 
     # Phase 2: Test Mode (Simulated Trading)
-    print("Phase 2: Simulating trades...")
+    print("\nPhase 2: Simulating trades...")
     valuation = ValuationAgent()
     sentiment = SentimentAgent()
     fundamentals = FundamentalsAgent()
@@ -32,6 +39,7 @@ def main():
         sentiment_signal = sentiment.analyze(crypto)
         fundamentals_signal = fundamentals.analyze(crypto)
         technicals_signal = technicals.analyze(crypto)
+        
         combined_signal = portfolio_manager.combine_signals(
             valuation_signal,
             sentiment_signal,
@@ -41,12 +49,19 @@ def main():
         signals.append(combined_signal)
 
     portfolio = portfolio_manager.allocate(signals)
-    print("Portfolio allocation:")
+    print("\nPortfolio allocation:")
     print(portfolio)
 
-    # Phase 3: Production Mode
-    print("Phase 3: Running in production...")
-    # Implement live trading logic here using Binance API
+    # Backtesting
+    backtester = Backtester()
+    for asset, allocation in portfolio.items():
+        backtester.simulate_trade("EUR", asset, allocation)
+
+    backtester.save_results()
+
+    # Phase 3: Production Mode (Placeholder)
+    print("\nPhase 3: Running in production...")
+    print("This phase is not yet implemented. Use APIs for live trading logic.")
 
 if __name__ == "__main__":
     main()

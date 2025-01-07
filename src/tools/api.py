@@ -1,21 +1,34 @@
+from binance.client import Client
 import requests
 
-class BinanceAPI:
-    BASE_URL = "https://api.binance.com/api/v3/"
+# Binance Public Client
+binance_client = Client(api_key=None, api_secret=None)
 
-    def get_ticker(self, symbol):
-        response = requests.get(f"{self.BASE_URL}ticker/24hr", params={"symbol": symbol})
-        return response.json()
+def get_binance_ticker(symbol: str):
+    """
+    Get the latest price ticker for a given symbol from Binance public API.
+    """
+    try:
+        url = f"https://api.binance.com/api/v3/ticker/price?symbol={symbol}"
+        response = requests.get(url)
+        return response.json() if response.status_code == 200 else None
 
-    def get_market_data(self):
-        # Fetch all market data
-        response = requests.get(f"{self.BASE_URL}exchangeInfo")
-        return response.json()
+#        ticker = binance_client.get_symbol_ticker(symbol=symbol)
+#        return ticker
 
-class PancakeSwapAPI:
-    # Add PancakeSwap-specific methods
-    pass
+    except Exception as e:
+        print(f"Error fetching Binance ticker for {symbol}: {e}")
+        return None
 
-def get_market_data():
-    api = BinanceAPI()
-    return api.get_market_data()
+def get_pancakeswap_prices():
+    """
+    Fetch token prices from PancakeSwap public API.
+    Example: PancakeSwap doesn't have an official public API; use external APIs or smart contracts.
+    """
+    try:
+        url = "https://api.pancakeswap.info/api/v2/tokens"
+        response = requests.get(url)
+        return response.json() if response.status_code == 200 else None
+    except Exception as e:
+        print(f"Error fetching PancakeSwap prices: {e}")
+        return None
