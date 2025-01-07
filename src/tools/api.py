@@ -13,12 +13,16 @@ def get_binance_ticker():
         }
     return market_data
 
-
 def get_pancakeswap_prices():
     url = "https://api.pancakeswap.info/api/v2/tokens"
     response = requests.get(url)
     data = response.json()
-
+    print("PancakeSwap API Response:", data)  # Debugging output
+    
+    # Check if 'data' exists in the response
+    if 'data' not in data:
+        raise KeyError("'data' key not found in PancakeSwap API response")
+    
     market_data = {}
     for token, info in data['data'].items():
         market_data[token] = {
@@ -26,6 +30,7 @@ def get_pancakeswap_prices():
             'price_change_percent': 0,  # Default or calculate if available
         }
     return market_data
+
 
 
 def get_market_data():
