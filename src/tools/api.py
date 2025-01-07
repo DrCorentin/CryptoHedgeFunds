@@ -23,9 +23,8 @@ def get_binance_prices():
 
 
 def get_market_data():
-    # Replace with a real API endpoint or mock data
     try:
-        response = requests.get("https://api.example.com/market_data")
+        response = requests.get("https://api.binance.com/api/v3/ticker/24hr")
         response.raise_for_status()
         return response.json()
     except Exception as e:
