@@ -54,9 +54,17 @@ class Backtester:
         print(f"Trade executed: {trade}")
 
 
+    def get_price(self, to_asset):
+        """
+        Fetch price for the asset. (Placeholder for actual API calls)
+        """
+        # Mock example, replace with actual price fetching logic
+        mock_prices = {"BTC": 30000, "ETH": 2000, "USDT": 1}
+        return mock_prices.get(to_asset)
+
     def save_results(self):
         """
-        Save all trades to a CSV file.
+        Save simulation results to a CSV file.
         """
         df = pd.DataFrame(self.trades)
         df.to_csv("data/logs/simulation_results.csv", index=False)

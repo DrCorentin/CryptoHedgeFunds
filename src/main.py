@@ -52,7 +52,9 @@ def main():
     print("Simulating trades...")
     trades = portfolio_manager.generate_trades(portfolio)
     backtester = Backtester()
-    backtester.simulate(trades)
+    for trade in trades:
+        backtester.simulate_trade(trade['from'], trade['to'], trade['amount'])
+    backtester.save_results()
 
     print("Simulation completed. Results saved to data/logs/simulation_results.csv")
 
