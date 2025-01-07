@@ -7,6 +7,9 @@ from src.agents.risk_manager import RiskManager
 from src.agents.portfolio_manager import PortfolioManager
 from src.tools.api import get_market_data
 from src.backtester import Backtester
+import sys
+import os
+sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 
 def main():
