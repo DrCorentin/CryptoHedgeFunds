@@ -1,17 +1,3 @@
-from src.agents.identifier import IdentifierAgent
-from src.agents.valuation import ValuationAgent
-from src.agents.sentiment import SentimentAgent
-from src.agents.fundamentals import FundamentalsAgent
-from src.agents.technicals import TechnicalsAgent
-from src.agents.risk_manager import RiskManager
-from src.agents.portfolio_manager import PortfolioManager
-from src.tools.api import get_market_data
-from src.backtester import Backtester
-import sys
-import os
-sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-
-
 def main():
     print("Starting AI Crypto Hedge Fund...")
 
@@ -27,8 +13,8 @@ def main():
     sentiment = SentimentAgent()
     fundamentals = FundamentalsAgent()
     technicals = TechnicalsAgent()
-    risk_manager = RiskManager()
     portfolio_manager = PortfolioManager()
+    backtester = Backtester()
 
     signals = []
     for crypto in high_potential_cryptos:
@@ -37,10 +23,7 @@ def main():
         fundamentals_signal = fundamentals.analyze(crypto)
         technicals_signal = technicals.analyze(crypto)
         combined_signal = portfolio_manager.combine_signals(
-            valuation_signal,
-            sentiment_signal,
-            fundamentals_signal,
-            technicals_signal
+            valuation_signal, sentiment_signal, fundamentals_signal, technicals_signal
         )
         signals.append(combined_signal)
 
@@ -48,15 +31,16 @@ def main():
     print("Portfolio allocation:")
     print(portfolio)
 
-    # Simulate trading
-    print("Simulating trades...")
+    # Generate and simulate trades
     trades = portfolio_manager.generate_trades(portfolio)
-    backtester = Backtester()
     for trade in trades:
         backtester.simulate_trade(trade['from'], trade['to'], trade['amount'])
+
     backtester.save_results()
 
-    print("Simulation completed. Results saved to data/logs/simulation_results.csv")
+    # Output final balances
+    print(f"Final Portfolio Value: {backtester.total_performance['EUR']} EUR")
+    print(f"BTC Equivalent: {backtester.total_performance['BTC']} BTC")
 
 
 if __name__ == "__main__":
