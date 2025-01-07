@@ -20,7 +20,7 @@ class Backtester:
             ticker = get_binance_prices("ETHUSDT")
             price = float(ticker["price"]) if ticker else None
         else:
-            prices = get_pancakeswap_prices()
+            prices = get_binance_prices()
             price = (
                 float(prices["data"].get(to_asset, {}).get("price", 0))
                 if prices else None
