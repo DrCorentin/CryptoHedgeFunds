@@ -13,7 +13,6 @@ def main():
 
     # Phase 1: Training the model
     print("\nPhase 1: Training models...")
-    # Simulate fetching market data
     market_data = {
         "BTC": get_binance_ticker("BTCUSDT"),
         "ETH": get_binance_ticker("ETHUSDT"),
@@ -39,7 +38,7 @@ def main():
         sentiment_signal = sentiment.analyze(crypto)
         fundamentals_signal = fundamentals.analyze(crypto)
         technicals_signal = technicals.analyze(crypto)
-        
+
         combined_signal = portfolio_manager.combine_signals(
             valuation_signal,
             sentiment_signal,
