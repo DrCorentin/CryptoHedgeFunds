@@ -5,7 +5,7 @@ from agents.fundamentals import FundamentalsAgent
 from agents.technicals import TechnicalsAgent
 from agents.risk_manager import RiskManager
 from agents.portfolio_manager import PortfolioManager
-from tools.api import APIClient
+from tools.api import * # Import all functions/variables from api.py
 from tools.utils import ensure_directories
 from backtester import Backtester
 
