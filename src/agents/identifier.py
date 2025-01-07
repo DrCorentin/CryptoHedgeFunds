@@ -1,15 +1,10 @@
-class IdentifierAgent:
-    def identify(self, market_data):
-        # Safely access 'price_change_percent' with a default value
-        try:
-            sorted_data = sorted(
-                market_data.items(),
-                key=lambda x: float(x[1].get('price_change_percent', 0)),  # Default to 0 if missing
-                reverse=True
-            )
-        except Exception as e:
-            print("Error sorting market data:", e)
-            return []
+import random
 
-        top_cryptos = [crypto[0] for crypto in sorted_data[:10]]
-        return top_cryptos
+class IdentifierAgent:
+    def __init__(self, top_n=10):
+        self.top_n = top_n
+
+    def identify_cryptos(self, market_data):
+        # Sort based on potential return (example logic: random selection)
+        sorted_data = sorted(market_data, key=lambda x: random.random())
+        return sorted_data[:self.top_n]

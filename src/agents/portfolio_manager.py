@@ -1,33 +1,50 @@
 class PortfolioManager:
     def __init__(self):
-        self.start_balance_euro = 50.0  # Starting balance in EUR
-        self.current_balance_euro = 50.0
-        self.current_balance_btc = 0.0  # BTC equivalent of the portfolio
+        self.starting_balance_eur = 0
+        self.crypto_holdings = {}  # Example: {'BTC': 0.1, 'ETH': 2.0}
+        self.fiat_balance_eur = 0
 
-    def combine_signals(self, *signals):
-        # Average signals to make a unified decision
-        average_score = sum(signal['score'] for signal in signals) / len(signals)
-        return {"crypto": signals[0]["crypto"], "score": average_score}
+    def initialize_portfolio(self, starting_balance):
+        """Initialize the portfolio with a starting balance."""
+        self.starting_balance_eur = starting_balance
+        self.fiat_balance_eur = starting_balance
+        print(f"Portfolio initialized with EUR balance: {self.fiat_balance_eur}")
 
-    def allocate(self, combined_signals):
-        # Allocate portfolio based on scores
-        sorted_signals = sorted(combined_signals, key=lambda x: x["score"], reverse=True)
-        portfolio = {signal["crypto"]: signal["score"] for signal in sorted_signals[:5]}
-        return portfolio
+    def evaluate_fund_size(self, current_prices):
+        """
+        Calculate the total fund value in EUR.
+        :param current_prices: Dictionary of crypto prices in EUR.
+                               Example: {'BTC': 25000, 'ETH': 1500}
+        """
+        total_crypto_value_eur = sum(
+            self.crypto_holdings[crypto] * current_prices.get(crypto, 0)
+            for crypto in self.crypto_holdings
+        )
+        total_fund_size_eur = self.fiat_balance_eur + total_crypto_value_eur
+        print(f"Current fiat balance: {self.fiat_balance_eur} EUR")
+        print(f"Current crypto holdings value: {total_crypto_value_eur} EUR")
+        print(f"Total fund size: {total_fund_size_eur} EUR")
+        return total_fund_size_eur
 
-    def generate_trades(self, portfolio):
-        # AI-based trade generation
-        trades = []
-        for crypto, allocation in portfolio.items():
-            amount = allocation * self.current_balance_euro  # Allocate portion of balance
-            trades.append({
-                'from': 'EUR',
-                'to': crypto,
-                'amount': amount
-            })
-        return trades
+    def update_portfolio(self, trade_details, trade_price):
+        """
+        Update the portfolio after a trade.
+        :param trade_details: Dictionary with trade info.
+                              Example: {'from': 'EUR', 'to': 'BTC', 'amount': 500}
+        :param trade_price: The price of the traded asset in EUR.
+        """
+        from_asset = trade_details['from']
+        to_asset = trade_details['to']
+        amount = trade_details['amount']
 
-    def update_balances(self, trade_result):
-        # Update balances based on trade results
-        self.current_balance_euro = trade_result["return_euro"]
-        self.current_balance_btc = trade_result["return_btc"]
+        if from_asset == 'EUR':
+            self.fiat_balance_eur -= amount
+            self.crypto_holdings[to_asset] = self.crypto_holdings.get(to_asset, 0) + (amount / trade_price)
+        elif to_asset == 'EUR':
+            self.fiat_balance_eur += amount * trade_price
+            self.crypto_holdings[from_asset] -= amount
+        else:
+            self.crypto_holdings[from_asset] -= amount
+            self.crypto_holdings[to_asset] = self.crypto_holdings.get(to_asset, 0) + (amount * trade_price)
+
+        print(f"Updated portfolio: Fiat - {self.fiat_balance_eur} EUR, Crypto - {self.crypto_holdings}")

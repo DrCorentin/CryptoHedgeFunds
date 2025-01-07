@@ -1,4 +1,4 @@
 class TechnicalsAgent:
-    def analyze(self, crypto):
-        # Placeholder for technical analysis
-        return {"crypto": crypto, "score": 0.8}
+    def analyze_technical_indicators(self, price_data):
+        # Dummy example: if RSI < 30, consider oversold
+        return 'BUY' if price_data.get('rsi', 50) < 30 else 'SELL'
