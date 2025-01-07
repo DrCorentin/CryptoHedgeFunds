@@ -1,5 +1,5 @@
 import pandas as pd
-from tools.api import get_binance_ticker, get_pancakeswap_prices
+from tools.api import get_binance_ticker
 import time
 
 class Backtester:
