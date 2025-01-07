@@ -9,15 +9,15 @@ def main():
     if not market_data:
         print("Error: No market data available.")
         return
-    identifier = IdentifierAgent()
+    identifier = identifier()
     high_potential_cryptos = identifier.identify(market_data)
 
     # Phase 2: Test Mode (Simulated Trading)
     print("Phase 2: Simulating trades...")
-    valuation = ValuationAgent()
-    sentiment = SentimentAgent()
-    fundamentals = FundamentalsAgent()
-    technicals = TechnicalsAgent()
+    valuation = Valuation()
+    sentiment = Sentiment()
+    fundamentals = Fundamentals()
+    technicals = Technicals()
     portfolio_manager = PortfolioManager()
     backtester = Backtester()
 
