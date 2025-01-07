@@ -6,6 +6,9 @@ def main():
     # Phase 1: Training the model
     print("Phase 1: Training models...")
     market_data = get_market_data()
+    if not market_data:
+        print("Error: No market data available.")
+        return
     identifier = IdentifierAgent()
     high_potential_cryptos = identifier.identify(market_data)
 
