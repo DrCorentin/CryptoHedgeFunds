@@ -15,7 +15,7 @@ class Backtester:
         """
         if to_asset == "BTC":
             ticker = get_binance_prices("BTCUSDT")
-            price = float(get_binance_prices["price"]) if ticker else None
+            price = float(ticker["price"]) if ticker else None
         elif to_asset == "ETH":
             ticker = get_binance_prices("ETHUSDT")
             price = float(ticker["price"]) if ticker else None
@@ -30,10 +30,16 @@ class Backtester:
             print(f"Error: Could not fetch price for {to_asset}. Trade skipped.")
             return
 
-        return_euro = amount * price if from_asset == "EUR" else amount / price
-        return_btc = return_euro / price
-        return_percentage = (return_euro / self.start_balance_euro - 1) * 100
+        # Simulate the return in EUR and BTC based on the trade
+        if from_asset == "EUR":
+            return_euro = amount * price
+        else:
+            return_euro = amount / price
 
+        return_btc = return_euro / price
+        return_percentage = ((return_euro / self.start_balance_euro) - 1) * 100
+
+        # Prepare trade record
         trade = {
             "timestamp": time.strftime("%Y-%m-%d %H:%M:%S", time.gmtime()),
             "from_to": f"{from_asset} -> {to_asset}",
@@ -42,8 +48,11 @@ class Backtester:
             "return_btc": return_btc,
             "return_percentage": return_percentage,
         }
+
+        # Append to trades list and print trade
         self.trades.append(trade)
         print(f"Trade executed: {trade}")
+
 
     def save_results(self):
         """
