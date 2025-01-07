@@ -1,12 +1,12 @@
-from agents.identifier import IdentifierAgent
-from agents.valuation import ValuationAgent
-from agents.sentiment import SentimentAgent
-from agents.fundamentals import FundamentalsAgent
-from agents.technicals import TechnicalsAgent
-from agents.risk_manager import RiskManager
-from agents.portfolio_manager import PortfolioManager
-from tools.api import get_market_data
-from backtester import Backtester
+from src.agents.identifier import IdentifierAgent
+from src.agents.valuation import ValuationAgent
+from src.agents.sentiment import SentimentAgent
+from src.agents.fundamentals import FundamentalsAgent
+from src.agents.technicals import TechnicalsAgent
+from src.agents.risk_manager import RiskManager
+from src.agents.portfolio_manager import PortfolioManager
+from src.tools.api import get_market_data
+from src.backtester import Backtester
 
 
 def main():
@@ -15,16 +15,8 @@ def main():
     # Phase 1: Training the model
     print("Phase 1: Training models...")
     market_data = get_market_data()
-    print("Market Data Sample:", list(market_data.items())[:5])  # Debugging output
-
     identifier = IdentifierAgent()
     high_potential_cryptos = identifier.identify(market_data)
-
-    if not high_potential_cryptos:
-        print("No high-potential cryptocurrencies identified. Exiting...")
-        return
-
-    print("High-Potential Cryptos Identified:", high_potential_cryptos)
 
     # Phase 2: Test Mode (Simulated Trading)
     print("Phase 2: Simulating trades...")
@@ -53,14 +45,13 @@ def main():
     print("Portfolio allocation:")
     print(portfolio)
 
-    # Simulate trades
-    trades = portfolio_manager.generate_orders(portfolio)
+    # Simulate trading
+    print("Simulating trades...")
+    trades = portfolio_manager.generate_trades(portfolio)
     backtester = Backtester()
     backtester.simulate(trades)
 
-    # Phase 3: Production Mode
-    print("Phase 3: Running in production...")
-    # Add live trading logic here using APIs (Binance or PancakeSwap)
+    print("Simulation completed. Results saved to data/logs/simulation_results.csv")
 
 
 if __name__ == "__main__":
