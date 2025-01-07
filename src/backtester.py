@@ -32,14 +32,15 @@ class Backtester:
         prices = get_binance_prices()
         return float(prices.get(to_asset, {}).get("price", 0))
 
-    def save_results(self):
+
+def save_results(self):
+        # Ensure the directory exists
+        logs_dir = "data/logs"
+        os.makedirs(logs_dir, exist_ok=True)
+
         # Save results to a file
-        with open("data/logs/simulation_results.csv", "w") as f:
-            writer = csv.writer(f)
-            writer.writerow(["Timestamp", "From -> To", "Price", "Return (EUR)", "Return (BTC)"])
+        with open(f"{logs_dir}/simulation_results.csv", "w") as f:
+            f.write("timestamp,from_to,price,return_euro,return_btc,return_percentage\n")
             for trade in self.trades:
-                writer.writerow([
-                    trade["timestamp"], trade["from_to"], trade["price"],
-                    trade["return_euro"], trade["return_btc"]
-                ])
-        print("Simulation results saved.")
+                f.write(f"{trade['timestamp']},{trade['from_to']},{trade['price']},{trade['return_euro']},{trade['return_btc']},{trade['return_percentage']}\n")
+        print(f"Simulation results saved to {logs_dir}/simulation_results.csv")
