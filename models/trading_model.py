@@ -8,7 +8,6 @@ class TradingModel:
         :param data_point: A dictionary containing market data.
         :return: A trading signal ('buy', 'sell', or 'hold').
         """
-        # Example logic: Buy if price_change is positive, sell if negative
         price_change = data_point.get("price_change", 0)
         if price_change > 0:
             return "buy"

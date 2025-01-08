@@ -6,13 +6,11 @@ from backtester import Backtester
 from agents.identifier import CryptoIdentifier
 from agents.portfolio_manager import PortfolioManager
 from tools.api import BinanceAPI
+from models.trading_model import TradingModel  # Import TradingModel
 
 def main():
     # Initialize API client
     api_client = BinanceAPI()
-
-     # Initialize the trading model
-    trading_model = TradingModel()
 
     # Step 1: Identify high-potential cryptos
     identifier = CryptoIdentifier(api_client=api_client)
@@ -34,7 +32,8 @@ def main():
     # Step 3: Backtesting
     print("Starting Backtest...")
     historical_data = load_historical_data()  # Load historical data
-    backtester = Backtester(model=portfolio_manager, historical_data=historical_data)
+    trading_model = TradingModel()  # Initialize TradingModel
+    backtester = Backtester(model=trading_model, historical_data=historical_data)
     backtester.run_backtest()
     backtester.report()
 
@@ -71,16 +70,6 @@ def save_recommendations(recommendations):
 
     updated_data.to_csv(filename, index=False)
     print(f"Recommendations saved to {filename}")
-
-def display_accuracy(backtester):
-    """
-    Display accuracy in a continuous form during backtesting.
-
-    :param backtester: Backtester instance running the backtest.
-    """
-    for accuracy in backtester.continuous_accuracy():
-        print(f"\raccuracy... {accuracy:.2f}%", end="", flush=True)
-    print()  # Add newline for clean output
 
 if __name__ == "__main__":
     main()
