@@ -1,32 +1,49 @@
+from binance.client import Client
 import pandas as pd
-from tools.api import get_market_data, get_social_data
 
 class CryptoIdentifier:
-    def __init__(self, top_n=10):
-        self.top_n = top_n
+    def __init__(self, api_key=None, api_secret=None):
+        # Initialize Binance API client
+        self.client = Client(api_key, api_secret)
+
+    def fetch_market_data(self):
+        """
+        Fetch market data from Binance and return a DataFrame.
+        """
+        # Fetch 24hr ticker price change statistics for all symbols
+        tickers = self.client.get_ticker()
+
+        # Extract relevant data into a DataFrame
+        data = []
+        for ticker in tickers:
+            data.append({
+                'symbol': ticker['symbol'],
+                'volume': float(ticker['volume']),
+                'price_change_percent': float(ticker['priceChangePercent']),
+            })
+
+        market_data = pd.DataFrame(data)
+        return market_data
 
     def identify_high_potential_cryptos(self):
-        market_data = get_market_data()
-        social_data = get_social_data()
+        # Fetch market data
+        market_data = self.fetch_market_data()
 
-        # Filter liquid crypto pairs
-        liquid_cryptos = market_data[(market_data['volume'] > 1_000_000)]
+        # Filter for high-volume cryptos
+        market_data['volume'] = pd.to_numeric(market_data['volume'], errors='coerce')
+        market_data = market_data.dropna(subset=['volume'])
+        liquid_cryptos = market_data[market_data['volume'] > 1_000_000]
 
-        # Merge with social data
-        combined_data = pd.merge(liquid_cryptos, social_data, on='symbol')
+        # Sort by price change percentage (descending) to find high-potential cryptos
+        liquid_cryptos = liquid_cryptos.sort_values(by='price_change_percent', ascending=False)
 
-        # Scoring based on volume, bid/ask spread, and community activity
-        combined_data['score'] = (
-            combined_data['volume'] * 0.4 +
-            (combined_data['bid_volume'] - combined_data['ask_volume']) * 0.3 +
-            combined_data['community_activity'] * 0.3
-        )
+        # Return the top cryptos
+        return liquid_cryptos
 
-        # Select top N cryptos
-        top_cryptos = combined_data.nlargest(self.top_n, 'score')
-        return top_cryptos[['symbol', 'score']]
-
+# Example usage
 if __name__ == "__main__":
-    identifier = CryptoIdentifier()
+    identifier = CryptoIdentifier()  # Provide API keys if needed
     top_cryptos = identifier.identify_high_potential_cryptos()
-    print(top_cryptos)
+
+    print("Top Cryptos Identified:")
+    print(top_cryptos.head(10))  # Display the top 10 cryptos

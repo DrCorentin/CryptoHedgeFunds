@@ -11,98 +11,51 @@ class TechnicalsAgent:
         self.macd_signal = macd_signal
 
     def calculate_moving_averages(self, prices):
+        if prices.empty:
+            raise ValueError("Price data is empty.")
         ma = {}
         for period in self.moving_average_periods:
+            if len(prices) < period:
+                raise ValueError(f"Not enough data points for moving average period: {period}")
             ma[f"ma_{period}"] = prices.rolling(window=period).mean()
         return pd.DataFrame(ma)
 
     def calculate_rsi(self, prices):
+        if prices.empty:
+            raise ValueError("Price data is empty.")
+        if len(prices) < self.rsi_period:
+            raise ValueError(f"Not enough data points for RSI period: {self.rsi_period}")
         delta = prices.diff()
-        gain = np.where(delta > 0, delta, 0)
-        loss = np.where(delta < 0, -delta, 0)
-        avg_gain = pd.Series(gain).rolling(window=self.rsi_period).mean()
-        avg_loss = pd.Series(loss).rolling(window=self.rsi_period).mean()
+        gain = delta.where(delta > 0, 0)
+        loss = -delta.where(delta < 0, 0)
+        avg_gain = gain.rolling(window=self.rsi_period, min_periods=1).mean()
+        avg_loss = loss.rolling(window=self.rsi_period, min_periods=1).mean()
         rs = avg_gain / avg_loss
         rsi = 100 - (100 / (1 + rs))
-        return pd.Series(rsi, name="rsi")
+        return rsi
 
     def calculate_macd(self, prices):
+        if prices.empty:
+            raise ValueError("Price data is empty.")
+        if len(prices) < self.macd_slow:
+            raise ValueError(f"Not enough data points for MACD slow period: {self.macd_slow}")
         ema_fast = prices.ewm(span=self.macd_fast, adjust=False).mean()
         ema_slow = prices.ewm(span=self.macd_slow, adjust=False).mean()
         macd_line = ema_fast - ema_slow
         signal_line = macd_line.ewm(span=self.macd_signal, adjust=False).mean()
         macd_histogram = macd_line - signal_line
         return pd.DataFrame({
-            "macd_line": macd_line,
-            "signal_line": signal_line,
-            "macd_histogram": macd_histogram
+            'macd_line': macd_line,
+            'signal_line': signal_line,
+            'macd_histogram': macd_histogram
         })
 
-    def calculate_bollinger_bands(self, prices, window=20, num_std=2):
-        sma = prices.rolling(window=window).mean()
-        std_dev = prices.rolling(window=window).std()
-        upper_band = sma + (num_std * std_dev)
-        lower_band = sma - (num_std * std_dev)
-        return pd.DataFrame({
-            "upper_band": upper_band,
-            "lower_band": lower_band,
-            "sma": sma
-        })
-
-    def analyze_technical_indicators(self, historical_data):
-        historical_data = historical_data.copy()
-        moving_averages = self.calculate_moving_averages(historical_data['close'])
-        rsi = self.calculate_rsi(historical_data['close'])
-        macd = self.calculate_macd(historical_data['close'])
-        bollinger_bands = self.calculate_bollinger_bands(historical_data['close'])
-
-        historical_data = pd.concat(
-            [historical_data, moving_averages, rsi, macd, bollinger_bands],
-            axis=1
-        )
-        return historical_data
-
-    def evaluate(self, crypto_symbols):
-        signals = {}
-        for symbol in crypto_symbols:
-            # Fetch historical data
-            historical_data = get_historical_data(symbol)
-
-            # Calculate indicators
-            analysis = self.analyze_technical_indicators(historical_data)
-
-            # Generate signals (improved logic)
-            latest = analysis.iloc[-1]
-            signal = "neutral"
-            if latest['rsi'] < 30 and latest['macd_line'] > latest['signal_line']:
-                signal = "bullish"
-            elif latest['rsi'] > 70 and latest['macd_line'] < latest['signal_line']:
-                signal = "bearish"
-
-            # Bollinger Band confirmation
-            if latest['close'] < latest['lower_band']:
-                bb_signal = "bullish"
-            elif latest['close'] > latest['upper_band']:
-                bb_signal = "bearish"
-            else:
-                bb_signal = "neutral"
-
-            signals[symbol] = {
-                "signal": signal,
-                "bb_signal": bb_signal,
-                "rsi": latest['rsi'],
-                "macd_signal": "bullish" if latest['macd_line'] > latest['signal_line'] else "bearish",
-                "macd_histogram": latest['macd_histogram'],
-                "bollinger_bands": {
-                    "upper": latest['upper_band'],
-                    "lower": latest['lower_band']
-                }
-            }
-
-        return signals
-
-if __name__ == "__main__":
-    agent = TechnicalsAgent()
-    technicals = agent.evaluate(['BTCUSDT', 'ETHUSDT', 'BNBUSDT'])
-    print("Technical Analysis:")
-    print(technicals)
+    def fetch_and_calculate_technicals(self, symbol, start_date, end_date):
+        prices = get_historical_data(symbol, start_date, end_date)
+        if prices.empty:
+            raise ValueError(f"No historical data fetched for symbol: {symbol}")
+        moving_averages = self.calculate_moving_averages(prices['close'])
+        rsi = self.calculate_rsi(prices['close'])
+        macd = self.calculate_macd(prices['close'])
+        technicals = pd.concat([moving_averages, rsi.rename('rsi'), macd], axis=1)
+        return technicals
