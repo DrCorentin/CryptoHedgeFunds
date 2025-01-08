@@ -11,34 +11,52 @@ class PortfolioManager:
         """
         self.api_client = api_client
 
-    def generate_recommendations(self, high_potential_cryptos, total_assets=10_000):
+def generate_recommendations(self, high_potential_cryptos, total_assets=10_000):
+    """
+    Generates trading recommendations based on asset size and high-potential cryptos.
+
+    :param high_potential_cryptos: DataFrame of high-potential cryptos identified by the identifier agent.
+    :param total_assets: The total value of the portfolio in EUR.
+    :return: A DataFrame containing trading recommendations.
+    """
+    # Validate symbols before generating recommendations
+    available_symbols = self.get_available_symbols()
+
+    btc_allocation = self.calculate_btc_allocation(total_assets)
+    btc_prices = self.fetch_price_info("BTCUSDT")
+    btc_volume = btc_allocation / btc_prices['last_price']
+
+    remaining_allocation = total_assets - btc_allocation
+    allocation_per_crypto = remaining_allocation / 5
+
+    recommendations = [{"pair": "BTC/EUR", "strategy": "buy", "volume": btc_volume, "allocation": btc_allocation}]
+
+    for _, crypto in high_potential_cryptos.head(5).iterrows():
+        symbol = crypto['symbol']
+        if symbol not in available_symbols:
+            print(f"Skipping unavailable symbol: {symbol}")
+            continue
+
+        crypto_prices = self.fetch_price_info(symbol)
+        crypto_volume = allocation_per_crypto / crypto_prices['last_price']
+        recommendations.append({
+            "pair": f"{symbol}/EUR",
+            "strategy": "buy",
+            "volume": crypto_volume,
+            "allocation": allocation_per_crypto
+        })
+
+    return pd.DataFrame(recommendations)
+
+    def get_available_symbols(self):
         """
-        Generates trading recommendations based on asset size and high-potential cryptos.
+        Fetches a list of all available symbols on Binance.
 
-        :param high_potential_cryptos: DataFrame of high-potential cryptos identified by the identifier agent.
-        :param total_assets: The total value of the portfolio in EUR.
-        :return: A DataFrame containing trading recommendations.
+        :return: A set of available trading symbols.
         """
-        btc_allocation = self.calculate_btc_allocation(total_assets)
-        btc_prices = self.fetch_price_info("BTCUSDT")
-        btc_volume = btc_allocation / btc_prices['last_price']
+        exchange_info = self.api_client.client.get_exchange_info()
+        return {symbol['symbol'] for symbol in exchange_info['symbols']}
 
-        remaining_allocation = total_assets - btc_allocation
-        allocation_per_crypto = remaining_allocation / 5
-
-        recommendations = [{"pair": "BTC/EUR", "strategy": "buy", "volume": btc_volume, "allocation": btc_allocation}]
-
-        for _, crypto in high_potential_cryptos.head(5).iterrows():
-            crypto_prices = self.fetch_price_info(f"{crypto['symbol']}USDT")
-            crypto_volume = allocation_per_crypto / crypto_prices['last_price']
-            recommendations.append({
-                "pair": f"{crypto['symbol']}/EUR",
-                "strategy": "buy",
-                "volume": crypto_volume,
-                "allocation": allocation_per_crypto
-            })
-
-        return pd.DataFrame(recommendations)
 
     def calculate_btc_allocation(self, total_assets):
         """

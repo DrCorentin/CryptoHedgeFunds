@@ -1,31 +1,64 @@
-#src/backtester.py
-import pandas as pd
-import numpy as np
-import tensorflow as tf
-from sklearn.preprocessing import MinMaxScaler
-from tools.utils import calculate_returns
+# File: src/backtester.py
 
-# Load model
-model = tf.keras.models.load_model("models/trained_model.h5")
-# Load data
-df = pd.read_csv("data/historical/data.csv")
+class Backtester:
+    def __init__(self, model, historical_data):
+        """
+        Initialize the Backtester.
 
-# Preprocessing (same as training)
-scaler = MinMaxScaler(feature_range=(0, 1))
-scaled_data = scaler.fit_transform(df['Close'].values.reshape(-1, 1))
+        :param model: The trained model to evaluate.
+        :param historical_data: Historical data for backtesting.
+        """
+        self.model = model
+        self.historical_data = historical_data
+        self.correct_predictions = 0
+        self.total_predictions = 0
 
-# Backtesting loop
-initial_capital_eur = 5000
-initial_capital_btc = 1
-predictions = []
-for i in range(60, len(scaled_data)): # Start from sequence length
-    x_input = scaled_data[i-60:i].reshape(1, -1, 1)
-    yhat = model.predict(x_input)
-    predictions.append(scaler.inverse_transform(yhat)[0][0])
+    def run_backtest(self):
+        """
+        Run the backtest and calculate performance metrics.
+        """
+        for i, data_point in enumerate(self.historical_data, start=1):
+            actual_signal = data_point["actual_signal"]  # Replace with your actual signal field
+            predicted_signal = self.model.predict(data_point)
 
-df_backtest = df[60:].copy()
-df_backtest['Predictions'] = predictions
-df_backtest = calculate_returns(df_backtest, initial_capital_eur, initial_capital_btc)
+            # Compare predictions with actual signals
+            self.total_predictions += 1
+            if predicted_signal == actual_signal:
+                self.correct_predictions += 1
 
-df_backtest.to_csv("backtest_results.csv")
-print("Backtesting results saved to backtest_results.csv")
+            # Calculate and display accuracy
+            accuracy = (self.correct_predictions / self.total_predictions) * 100
+            print(f"\raccuracy... {accuracy:.2f}%", end="", flush=True)
+
+        print()  # Add a newline after the loop for clean output
+
+    def report(self):
+        """
+        Generate a report of the backtest results.
+        """
+        cumulative_return = sum(
+            self.simulate_trade(data_point, self.model.predict(data_point))
+            for data_point in self.historical_data
+        )
+        accuracy = (self.correct_predictions / self.total_predictions) * 100
+
+        print("\nBacktesting Report:")
+        print(f"Total Trades: {self.total_predictions}")
+        print(f"Correct Predictions: {self.correct_predictions}")
+        print(f"Accuracy: {accuracy:.2f}%")
+        print(f"Cumulative Return: {cumulative_return:.2f}")
+
+    def simulate_trade(self, data_point, predicted_signal):
+        """
+        Simulate a trade based on the predicted signal.
+
+        :param data_point: A single data point from historical data.
+        :param predicted_signal: The model's predicted trading signal.
+        :return: Simulated profit/loss for the trade.
+        """
+        if predicted_signal == "buy":
+            return data_point["price_change"]  # Example profit metric
+        elif predicted_signal == "sell":
+            return -data_point["price_change"]
+        else:  # Hold
+            return 0

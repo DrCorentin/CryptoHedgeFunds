@@ -12,7 +12,6 @@ class BinanceAPI:
         """
         self.client = Client(api_key, api_secret)
 
-
     def get_ticker_info(self, symbol):
         """
         Fetches the last price, bid price, and ask price for a specific trading pair.
@@ -20,12 +19,16 @@ class BinanceAPI:
         :param symbol: The trading pair symbol, e.g., "BTCUSDT".
         :return: A dictionary containing 'last_price', 'bid_price', and 'ask_price' as floats.
         """
-        ticker = self.client.get_ticker(symbol=symbol)
-        return {
-            'last_price': float(ticker['lastPrice']),
-            'bid_price': float(ticker['bidPrice']),
-            'ask_price': float(ticker['askPrice'])
-        }
+        try:
+            ticker = self.client.get_ticker(symbol=symbol)
+            return {
+                'last_price': float(ticker['lastPrice']),
+                'bid_price': float(ticker['bidPrice']),
+                'ask_price': float(ticker['askPrice'])
+            }
+        except Exception as e:
+            raise ValueError(f"Error fetching ticker info for {symbol}: {e}")
+
 
 
     def get_ticker(self, symbol=None):
