@@ -25,6 +25,9 @@ def main():
     print("Generated Recommendations:")
     print(recommendations)
 
+    # Save recommendations to CSV
+    save_recommendations(recommendations)
+
     # Step 3: Backtesting
     print("Starting Backtest...")
     historical_data = load_historical_data()  # Load historical data
@@ -33,7 +36,12 @@ def main():
     backtester.report()
 
 def load_historical_data():
-    # Replace with actual code to load historical data
+    """
+    Load historical data for backtesting.
+    Replace with actual data loading logic.
+
+    :return: List of historical data points.
+    """
     return [
         {"actual_signal": "buy", "price_change": 1.5},  # Example data point
         {"actual_signal": "hold", "price_change": 0.0},
@@ -42,6 +50,11 @@ def load_historical_data():
     ]
 
 def save_recommendations(recommendations):
+    """
+    Save recommendations to a CSV file.
+
+    :param recommendations: DataFrame of trading recommendations.
+    """
     output_dir = "data/recommendations/"
     os.makedirs(output_dir, exist_ok=True)
     filename = os.path.join(output_dir, "recommendations.csv")
@@ -55,6 +68,16 @@ def save_recommendations(recommendations):
 
     updated_data.to_csv(filename, index=False)
     print(f"Recommendations saved to {filename}")
+
+def display_accuracy(backtester):
+    """
+    Display accuracy in a continuous form during backtesting.
+
+    :param backtester: Backtester instance running the backtest.
+    """
+    for accuracy in backtester.continuous_accuracy():
+        print(f"\raccuracy... {accuracy:.2f}%", end="", flush=True)
+    print()  # Add newline for clean output
 
 if __name__ == "__main__":
     main()

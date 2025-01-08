@@ -5,13 +5,11 @@ import pandas as pd
 class CryptoIdentifier:
     def __init__(self, api_client):
         """
-        Initializes the Crypto Identifier agent with a given API client.
+        Initialize the Crypto Identifier agent with a given API client.
 
         :param api_client: An object to interact with the Binance API.
         """
         self.api_client = api_client
-
-        
 
     def identify_high_potential_cryptos(self):
         """
@@ -19,7 +17,6 @@ class CryptoIdentifier:
 
         :return: A DataFrame of identified high-potential cryptos.
         """
-        # Fetch market data from Binance
         market_data = self.fetch_market_data()
 
         # Filter for liquid cryptos (e.g., volume > 1M)
@@ -27,16 +24,15 @@ class CryptoIdentifier:
         market_data = market_data.dropna(subset=['volume'])
         liquid_cryptos = market_data[market_data['volume'] > 1_000_000]
 
-        # Calculate bid/ask spread as a percentage
+        # Safely modify DataFrame
+        liquid_cryptos = liquid_cryptos.copy()
         liquid_cryptos.loc[:, 'spread'] = (
             (liquid_cryptos['askPrice'] - liquid_cryptos['bidPrice']) / liquid_cryptos['askPrice']
         ) * 100
 
-
         # Sort by volume and smallest bid/ask spread
         liquid_cryptos = liquid_cryptos.sort_values(by=['volume', 'spread'], ascending=[False, True])
 
-        # Return the top 10 high-potential cryptos
         return liquid_cryptos.head(10)
 
     def fetch_market_data(self):
@@ -45,7 +41,7 @@ class CryptoIdentifier:
 
         :return: A DataFrame containing market data.
         """
-        tickers = self.api_client.get_ticker()
+        tickers = self.api_client.client.get_ticker()
         data = []
         for ticker in tickers:
             data.append({
