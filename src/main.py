@@ -11,6 +11,9 @@ def main():
     # Initialize API client
     api_client = BinanceAPI()
 
+     # Initialize the trading model
+    trading_model = TradingModel()
+
     # Step 1: Identify high-potential cryptos
     identifier = CryptoIdentifier(api_client=api_client)
     high_potential_cryptos = identifier.identify_high_potential_cryptos()
