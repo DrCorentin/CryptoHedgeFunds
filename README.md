@@ -72,6 +72,48 @@ ai-crypto-hedge-fund/
 ```
 
 
+## Presicion for avoidance of doubt
+
+2 models will be connected. Small precision, one model will solely be a learning model to identified trading patern and make recommendation (as buy, hold, sell), but will not make the trading itself. 
+
+one will be learning and making trading recommendation - use public API
+one will be executing the trade - use private API (to perform the trade)
+
+** all connection with the model 2 will be placeholder at the moment **
+
+1. the learning model should have the most important place and be continuous (required to identified tradinc decision: buy / hold / sell). 
+2. I want to use public API for the learning model. The trading would be call through a different python model. 
+3. each trading recommendation will be saved in a specific csv folder. 
+
+the model will be split as follow: 
+identified crypto with higher possible return, based on the following criteria: trading volume in the last 24h, bid volume, ask volume, bid price and ask price (to identify if it is mostly buy or sell signal). Can the crypto ticket (name of the crypto as BTC) and community engagement of official channels (X - formerly twitter, facebook, telegram...) an active community might present better return. Most important, it should be a liquid crypto pair. 
+When the model is doing a recommendation (the learning never stop), it should provide the following information: strategy (buy, hold, sell), the pair (crypto / fiat, crypto / crypto) and also provide volume (in percentage) to be bought. When it is crypto to crypto (example BTC / ETH), the model should estimate what would be the highest return between doing nothing or selling ETH to buy BTC if there was not ETH sell recommendation. (what is stronger, ETH hold or BTC buy). 
+
+BTC can be sold, but we try to keep a BTC base. 
+
+### ideas for the model features and structure
+learning (this is the learning to identify how the market works, what is triggering price movement and is potentially source of profit). This is a learning model (and should be regularly. 
+Binance API docs can be founds there: https://developers.binance.com/docs/binance-spot-api-docs/rest-api/market-data-endpoints
+This is to ensure no error arise due to incorrect argument call in the API. 
+
+
+current source code: https://github.com/DrCorentin/CryptoHedgeFunds/
+Maybe, there should be 3 distincts modules/models (learning pattern, trading recommendation and trading execution). 
+
+#### Code to be updated should ALWAYS be displayed in full (not just the adjustment) and should include file name. 
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
