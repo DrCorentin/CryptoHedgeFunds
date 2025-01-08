@@ -6,7 +6,7 @@ from backtester import Backtester
 from agents.identifier import CryptoIdentifier
 from agents.portfolio_manager import PortfolioManager
 from tools.api import BinanceAPI
-from models.trading_model import TradingModel  # Import TradingModel
+from models.trading_model import TradingModel
 
 def main():
     # Initialize API client
@@ -37,20 +37,6 @@ def main():
     backtester.run_backtest()
     backtester.report()
 
-def load_historical_data():
-    """
-    Load historical data for backtesting.
-    Replace with actual data loading logic.
-
-    :return: List of historical data points.
-    """
-    return [
-        {"actual_signal": "buy", "price_change": 1.5},  # Example data point
-        {"actual_signal": "hold", "price_change": 0.0},
-        {"actual_signal": "sell", "price_change": -1.0},
-        {"actual_signal": "buy", "price_change": 2.0},
-    ]
-
 def save_recommendations(recommendations):
     """
     Save recommendations to a CSV file.
@@ -64,12 +50,26 @@ def save_recommendations(recommendations):
     # Append or create the recommendations CSV
     if os.path.exists(filename):
         existing_data = pd.read_csv(filename)
-        updated_data = pd.concat([existing_data, recommendations])
+        updated_data = pd.concat([existing_data, recommendations], ignore_index=True)
     else:
         updated_data = recommendations
 
     updated_data.to_csv(filename, index=False)
     print(f"Recommendations saved to {filename}")
+
+def load_historical_data():
+    """
+    Load historical data for backtesting.
+    Replace with actual data loading logic.
+
+    :return: List of historical data points.
+    """
+    return [
+        {"actual_signal": "buy", "price_change": 1.5},  # Example data point
+        {"actual_signal": "hold", "price_change": 0.0},
+        {"actual_signal": "sell", "price_change": -1.0},
+        {"actual_signal": "buy", "price_change": 2.0},
+    ]
 
 if __name__ == "__main__":
     main()

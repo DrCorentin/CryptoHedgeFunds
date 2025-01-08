@@ -1,6 +1,7 @@
 # File: src/agents/portfolio_manager.py
 
 import pandas as pd
+from datetime import datetime
 
 class PortfolioManager:
     def __init__(self, api_client):
@@ -19,43 +20,39 @@ class PortfolioManager:
         :param total_assets: The total value of the portfolio in EUR.
         :return: A DataFrame containing trading recommendations.
         """
-        # Validate symbols before generating recommendations
-        available_symbols = self.get_available_symbols()
-
         btc_allocation = self.calculate_btc_allocation(total_assets)
         btc_prices = self.fetch_price_info("BTCUSDT")
         btc_volume = btc_allocation / btc_prices['last_price']
+        timestamp = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
 
         remaining_allocation = total_assets - btc_allocation
         allocation_per_crypto = remaining_allocation / 5
 
-        recommendations = [{"pair": "BTC/EUR", "strategy": "buy", "volume": btc_volume, "allocation": btc_allocation}]
+        recommendations = [{
+            "timestamp": timestamp,
+            "pair": "BTC/EUR",
+            "strategy": "buy",
+            "volume": btc_volume,
+            "unit_price": btc_prices['last_price'],
+            "total_price": btc_volume * btc_prices['last_price'],
+            "allocation": btc_allocation
+        }]
 
         for _, crypto in high_potential_cryptos.head(5).iterrows():
             symbol = crypto['symbol']
-            if symbol not in available_symbols:
-                print(f"Skipping unavailable symbol: {symbol}")
-                continue
-
             crypto_prices = self.fetch_price_info(symbol)
             crypto_volume = allocation_per_crypto / crypto_prices['last_price']
             recommendations.append({
+                "timestamp": timestamp,
                 "pair": f"{symbol}/EUR",
                 "strategy": "buy",
                 "volume": crypto_volume,
+                "unit_price": crypto_prices['last_price'],
+                "total_price": crypto_volume * crypto_prices['last_price'],
                 "allocation": allocation_per_crypto
             })
 
         return pd.DataFrame(recommendations)
-
-    def get_available_symbols(self):
-        """
-        Fetches a list of all available symbols on Binance.
-
-        :return: A set of available trading symbols.
-        """
-        exchange_info = self.api_client.client.get_exchange_info()
-        return {symbol['symbol'] for symbol in exchange_info['symbols']}
 
     def calculate_btc_allocation(self, total_assets):
         """
