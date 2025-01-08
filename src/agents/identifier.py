@@ -1,4 +1,3 @@
-import requests
 import pandas as pd
 from tools.api import get_market_data, get_social_data
 
@@ -11,7 +10,7 @@ class CryptoIdentifier:
         social_data = get_social_data()
 
         # Filter liquid crypto pairs
-        liquid_cryptos = market_data[(market_data['volume'] > 1000000)]
+        liquid_cryptos = market_data[(market_data['volume'] > 1_000_000)]
 
         # Merge with social data
         combined_data = pd.merge(liquid_cryptos, social_data, on='symbol')

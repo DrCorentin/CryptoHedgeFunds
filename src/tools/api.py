@@ -1,3 +1,4 @@
+import pandas as pd
 import requests
 
 def get_market_data():
@@ -16,3 +17,5 @@ def get_social_data():
     symbols = ["BTCUSDT", "ETHUSDT", "BNBUSDT"]
     activity_scores = {symbol: 100 for symbol in symbols}  # Mock data
     return pd.DataFrame(list(activity_scores.items()), columns=['symbol', 'community_activity'])
+
+

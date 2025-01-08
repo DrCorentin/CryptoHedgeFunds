@@ -1,4 +1,3 @@
-# File: src/agents/technicals.py
 import pandas as pd
 import numpy as np
 from tools.api import get_historical_data
@@ -39,11 +38,26 @@ class TechnicalsAgent:
             "macd_histogram": macd_histogram
         })
 
+    def calculate_bollinger_bands(self, prices, window=20, num_std=2):
+        sma = prices.rolling(window=window).mean()
+        std_dev = prices.rolling(window=window).std()
+        upper_band = sma + (num_std * std_dev)
+        lower_band = sma - (num_std * std_dev)
+        return pd.DataFrame({
+            "upper_band": upper_band,
+            "lower_band": lower_band,
+            "sma": sma
+        })
+
     def analyze_technical_indicators(self, historical_data):
-        historical_data['moving_averages'] = self.calculate_moving_averages(historical_data['close'])
-        historical_data['rsi'] = self.calculate_rsi(historical_data['close'])
+        historical_data = historical_data.copy()
+        moving_averages = self.calculate_moving_averages(historical_data['close'])
+        rsi = self.calculate_rsi(historical_data['close'])
+        macd = self.calculate_macd(historical_data['close'])
+        bollinger_bands = self.calculate_bollinger_bands(historical_data['close'])
+
         historical_data = pd.concat(
-            [historical_data, self.calculate_macd(historical_data['close'])],
+            [historical_data, moving_averages, rsi, macd, bollinger_bands],
             axis=1
         )
         return historical_data
@@ -57,25 +71,32 @@ class TechnicalsAgent:
             # Calculate indicators
             analysis = self.analyze_technical_indicators(historical_data)
 
-            # Generate signals (basic logic)
+            # Generate signals (improved logic)
             latest = analysis.iloc[-1]
             signal = "neutral"
-            if latest['rsi'] < 30:
-                signal = "bullish"  # Oversold condition
-            elif latest['rsi'] > 70:
-                signal = "bearish"  # Overbought condition
+            if latest['rsi'] < 30 and latest['macd_line'] > latest['signal_line']:
+                signal = "bullish"
+            elif latest['rsi'] > 70 and latest['macd_line'] < latest['signal_line']:
+                signal = "bearish"
 
-            # Add MACD confirmation
-            if latest['macd_line'] > latest['signal_line']:
-                macd_signal = "bullish"
+            # Bollinger Band confirmation
+            if latest['close'] < latest['lower_band']:
+                bb_signal = "bullish"
+            elif latest['close'] > latest['upper_band']:
+                bb_signal = "bearish"
             else:
-                macd_signal = "bearish"
+                bb_signal = "neutral"
 
             signals[symbol] = {
                 "signal": signal,
+                "bb_signal": bb_signal,
                 "rsi": latest['rsi'],
-                "macd_signal": macd_signal,
-                "macd_histogram": latest['macd_histogram']
+                "macd_signal": "bullish" if latest['macd_line'] > latest['signal_line'] else "bearish",
+                "macd_histogram": latest['macd_histogram'],
+                "bollinger_bands": {
+                    "upper": latest['upper_band'],
+                    "lower": latest['lower_band']
+                }
             }
 
         return signals
